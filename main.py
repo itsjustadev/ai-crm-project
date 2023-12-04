@@ -1,5 +1,5 @@
 import history_db as Tables
-import requests1 as AMO_functions
+import all_requests.requests1 as AMO_functions
 from dotenv import load_dotenv
 import os
 from aiogram import Bot, types
