@@ -1,7 +1,5 @@
-from aiogram.types import chat
-from history_db import check_history_table_exists, create_new_history_table, delete_history, delete_history_table, get_history, get_last_id_history, get_last_message_from_client, get_last_message_from_gpt, get_not_shorted_history, has_history_with_gpt, insert_history, is_vk_com_in_messages, replace_single_quotes_with_double
-from all_requests.access_token import amo_change_lead_status, amo_change_vk_link, amo_get_vk_link, amo_pipeline_change, get_amo_user, get_amo_user_id, get_analysis, get_entity_id, get_user_email, start_analysis_session, update_token, upload_file_to_crm
-from all_requests.requests1 import amo_chat_create, amo_share_incoming_voice_message, amo_share_incoming_message, amo_share_outgoing_message, amo_share_incoming_picture, amo_share_incoming_file
+import history_db as Tables
+import requests1 as AMO_functions
 from dotenv import load_dotenv
 import os
 from aiogram import Bot, types
@@ -16,11 +14,8 @@ import databases as BotActivity
 import requests
 import pathlib
 import json
-from psy_bot.databases_psy import add_new_lead_id as psy_add_new_lead_id, get_chat_by_user_id as psy_get_chat_by_user_id, get_username_by_chat as psy_get_username, get_name_by_chat as psy_get_name, add_new_message as psy_add_new_message
-from analysis import get_analyse
 from constants import *
-from functions_helpers import *
-
+from helpers_functions import *
 
 update_token()
 load_dotenv()
@@ -56,7 +51,7 @@ async def chat_join_request_handler(chat_join_request: types.ChatJoinRequest):
 async def upload_file(message: types.Message):
     try:
         chat_id = message.chat.id
-        check_chat_existing_in_database(str(chat_id))
+        Database.check_chat_existing_in_database(str(chat_id))
         user_name = message.from_user.username
         first_name = message.from_user.first_name
         if not user_name or not first_name:
@@ -88,11 +83,11 @@ async def upload_file(message: types.Message):
                     text = message.text
                 if message.caption:
                     text += ' ' + message.caption
-                response = amo_share_incoming_file(
+                response = AMO_functions.amo_share_incoming_file(
                     str(chat_id), user_name, first_name, link_to_download)
                 if response != 200:
                     await asyncio.sleep(5)
-                    response = amo_share_incoming_file(
+                    response = AMO_functions.amo_share_incoming_file(
                         str(chat_id), user_name, first_name, link_to_download)
                     if response != 200:
                         await bot.send_message(CHAT_FOR_LOGS, f'Could not share file to amo for {user_name}')
@@ -108,7 +103,7 @@ async def upload_file(message: types.Message):
 async def voice_handler(message: types.Message):
     try:
         chat_id = message.chat.id
-        check_chat_existing_in_database(str(chat_id))
+        Database.check_chat_existing_in_database(str(chat_id))
         user_name = message.from_user.username
         first_name = message.from_user.first_name
         if not user_name or not first_name:
@@ -140,11 +135,11 @@ async def voice_handler(message: types.Message):
                     text = message.text
                 if message.caption:
                     text += ' ' + message.caption
-                response = amo_share_incoming_voice_message(
+                response = AMO_functions.amo_share_incoming_voice_message(
                     str(chat_id), user_name, first_name, link_to_download)
                 if response != 200:
                     await asyncio.sleep(5)
-                    response = amo_share_incoming_voice_message(
+                    response = AMO_functions.amo_share_incoming_voice_message(
                         str(chat_id), user_name, first_name, link_to_download)
                     if response != 200:
                         await bot.send_message(CHAT_FOR_LOGS, f'Could not share file to amo for {user_name}')
@@ -161,7 +156,7 @@ async def voice_handler(message: types.Message):
 async def handle_photo(message: types.Message):
     try:
         chat_id = message.chat.id
-        check_chat_existing_in_database(str(chat_id))
+        Database.check_chat_existing_in_database(str(chat_id))
         user_name = message.from_user.username
         first_name = message.from_user.first_name
         if not user_name or not first_name:
@@ -193,11 +188,11 @@ async def handle_photo(message: types.Message):
                 text = message.text
             if message.caption:
                 text += ' ' + message.caption
-            response = amo_share_incoming_picture(
+            response = AMO_functions.amo_share_incoming_picture(
                 str(chat_id), user_name, first_name, link_to_download)
             if response != 200:
                 await asyncio.sleep(5)
-                response = amo_share_incoming_picture(
+                response = AMO_functions.amo_share_incoming_picture(
                     str(chat_id), user_name, first_name, link_to_download)
                 if response != 200:
                     await bot.send_message(CHAT_FOR_LOGS, f'Could not share picture to amo for {user_name}')
@@ -213,10 +208,10 @@ async def handle_photo(message: types.Message):
 async def receiver_chat_gpt(message):
     flag_first_message = False
     chat_id = message.chat.id
-    if not check_history_table_exists(chat_id):
+    if not Tables.check_history_table_exists(chat_id):
         flag_first_message = True
-        await start_command(message, bot)
-        await share_first_messages_with_amo(message, bot)
+        await BOT.start_command(message, bot)
+        await AMO.share_first_messages_with_amo(message, bot)
     if not BotActivity.check_bot_state_existing(chat_id):
         BotActivity.add_free_bot(chat_id)
     user_name = message.from_user.username
@@ -228,7 +223,7 @@ async def receiver_chat_gpt(message):
         user_name = str(message.from_user.username)
         first_name = str(message.from_user.first_name)
     if not flag_first_message:
-        await send_message_to_amo(chat_id, user_name, first_name, message, bot)
+        await AMO.send_message_to_amo(chat_id, user_name, first_name, message, bot)
     if message.reply_to_message:
         new_message = f'"{message.reply_to_message.text}"-'
         BotActivity.add_message_from_client(chat_id, new_message)

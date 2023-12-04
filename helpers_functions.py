@@ -1,30 +1,110 @@
-from aiogram.types import chat
-from history_db import check_history_table_exists, create_new_history_table, delete_history, delete_history_table, get_history, get_last_id_history, get_last_message_from_client, get_last_message_from_gpt, get_not_shorted_history, has_history_with_gpt, insert_history, is_vk_com_in_messages, replace_single_quotes_with_double
 from all_requests.access_token import amo_change_lead_status, amo_change_vk_link, amo_get_vk_link, amo_pipeline_change, get_amo_user, get_amo_user_id, get_analysis, get_entity_id, get_user_email, start_analysis_session, update_token, upload_file_to_crm
-from all_requests.requests1 import amo_chat_create, amo_share_incoming_voice_message, amo_share_incoming_message, amo_share_outgoing_message, amo_share_incoming_picture, amo_share_incoming_file
+from psy_bot.databases_psy import add_new_lead_id as psy_add_new_lead_id, get_chat_by_user_id as psy_get_chat_by_user_id, get_username_by_chat as psy_get_username, get_name_by_chat as psy_get_name, add_new_message as psy_add_new_message
+from analysis import get_analyse
+from aiogram.types import chat
+import history_db as Tables
+import all_requests.requests1 as AMO_functions
 from all_requests import download_file
 from dotenv import load_dotenv
 import os
-from aiogram import Bot, types
+from aiogram import types
 from aiogram.dispatcher import Dispatcher
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import openai
 import logging
 import asyncio
-import uvicorn
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import Request, HTTPException
 import databases as BotActivity
 import requests
-import pathlib
 import json
 import tiktoken
 import time
 import urllib.parse
 import datetime
-from psy_bot.databases_psy import add_new_lead_id as psy_add_new_lead_id, get_chat_by_user_id as psy_get_chat_by_user_id, get_username_by_chat as psy_get_username, get_name_by_chat as psy_get_name, add_new_message as psy_add_new_message
 import httpx
-from analysis import get_analyse
 from constants import *
+
+
+class AMO:
+    @staticmethod
+    async def send_message_to_amo(chat_id, user_name, first_name, message, bot):
+        try:
+            AMO_functions.amo_share_incoming_message(
+                str(chat_id), user_name, first_name, message.text)
+        except Exception as e:
+            logging.error(str(e), exc_info=True)
+            await bot.send_message(CHAT_FOR_LOGS, f'Could not send message to amo for {user_name}' + str(e))
+
+    @staticmethod
+    async def amo_double_incoming_message(chat_id, user_name, first_name, message, bot):
+        await asyncio.sleep(5)
+        response = AMO_functions.amo_share_incoming_message(
+            str(chat_id), user_name, first_name, message.text)
+        if response != 200:
+            await bot.send_message(CHAT_FOR_LOGS, f'Could not send message to amo for {user_name}')
+
+    @staticmethod
+    async def share_first_messages_with_amo(message, bot):
+        chat_id = message.chat.id
+        user_name = message.from_user.username
+        first_name = message.from_user.first_name
+        if not user_name or not first_name:
+            user_name = str(BotActivity.get_username_by_chat(chat_id))
+            first_name = str(BotActivity.get_name_by_chat(chat_id))
+        else:
+            user_name = str(message.from_user.username)
+            first_name = str(message.from_user.first_name)
+        await AMO.send_message_to_amo(chat_id, user_name, first_name, message, bot)
+        response = AMO_functions.amo_share_outgoing_message(
+            str(chat_id), user_name, first_name, TEXT_FOR_START)
+        if response != 200:
+            await asyncio.sleep(5)
+            response = AMO_functions.amo_share_outgoing_message(
+                str(chat_id), user_name, first_name, TEXT_FOR_START)
+            if response != 200:
+                await bot.send_message(CHAT_FOR_LOGS, f'Could not share TEXT for START for {user_name}')
+
+
+class BOT:
+    @staticmethod
+    async def start_command(message, bot):
+        chat_id = message.chat.id
+        BotActivity.add_disactive(str(chat_id))
+        user_name = message.from_user.username
+        first_name = message.from_user.first_name
+        if not BotActivity.get_username_by_chat(chat_id):
+            BotActivity.add_new_username_and_name(chat_id)
+            if not first_name or not user_name:
+                user_name = str(BotActivity.get_username_by_chat(chat_id))
+                first_name = str(BotActivity.get_name_by_chat(chat_id))
+        else:
+            user_name = str(message.from_user.username)
+            first_name = str(message.from_user.first_name)
+        try:
+            Tables.create_new_history_table(chat_id)
+            await bot.send_message(chat_id, TEXT_FOR_START)
+            Tables.insert_history(chat_id, 'gpt', TEXT_FOR_START)
+            # при создании чата amo_chat_create получаем conversation_id и чат id
+            response = AMO_functions.amo_chat_create(
+                str(chat_id), user_name, first_name)
+            if response.status_code != 200:
+                await asyncio.sleep(5)
+                response = AMO_functions.amo_chat_create(
+                    str(chat_id), user_name, first_name)
+                if response.status_code != 200:
+                    await bot.send_message(CHAT_FOR_LOGS, f'Could not create chat in amo for {user_name}')
+            received_data = json.loads(response.text)
+            user_id = received_data.get('id')
+            BotActivity.add_in_users(user_name, first_name, chat_id, user_id)
+        except Exception as e:
+            logging.error(str(e), exc_info=True)
+            await bot.send_message(CHAT_FOR_LOGS, f'Could not complete the start command in telegram for {user_name}'+str(e))
+
+
+class Database:
+    @staticmethod
+    def check_chat_existing_in_database(chat_id):
+        if not BotActivity.check_existing(chat_id):
+            BotActivity.add_disactive(chat_id)
 
 
 async def checking_messages(bot):
@@ -110,7 +190,7 @@ async def checking_recent_messages(bot):
                                 BotActivity.add_in_deal_to_close(chat_id, 2)
                                 send_text_to_amo(
                                     chat_id, lead_id, 'Вы на связи?')
-                            elif not BotActivity.get_count_to_close(chat_id) and not is_vk_com_in_messages(chat_id):
+                            elif not BotActivity.get_count_to_close(chat_id) and not Tables.is_vk_com_in_messages(chat_id):
                                 await bot.send_message(chat_id, 'У вас же есть группа ВКонтакте? Пришлете ссылку?')
                                 BotActivity.add_recent_message(
                                     chat_id, STAGE_IN_AMO_1)
@@ -161,27 +241,27 @@ async def checking_for_new_message(bot):
                         await bot.send_document(chat, document_file)
                     await bot.send_message(chat, TEXT_FOR_SECRET)
                     await bot.send_message(chat, TEXT_FOR_SECRET2)
-                    insert_history(chat, 'gpt', MESSAGE_FOR_SECRET)
-                    insert_history(
+                    Tables.insert_history(chat, 'gpt', MESSAGE_FOR_SECRET)
+                    Tables.insert_history(
                         chat, 'gpt', TEXT_FOR_SECRET)
-                    insert_history(
+                    Tables.insert_history(
                         chat, 'gpt', TEXT_FOR_SECRET2)
-                    amo_share_outgoing_message(
+                    AMO_functions.amo_share_outgoing_message(
                         str(chat), user_name, name, MESSAGE_FOR_SECRET)
-                    amo_share_outgoing_message(str(
+                    AMO_functions.amo_share_outgoing_message(str(
                         chat), user_name, name, TEXT_FOR_SECRET)
-                    amo_share_outgoing_message(str(
+                    AMO_functions.amo_share_outgoing_message(str(
                         chat), user_name, name, TEXT_FOR_SECRET2)
                 if status_id in [STAGE_FOR_MANAGER]:
                     await bot.send_message(chat, CONTENT_FOR_MANAGER)
-                    amo_share_outgoing_message(
+                    AMO_functions.amo_share_outgoing_message(
                         str(chat), user_name, name, CONTENT_FOR_MANAGER)
                 if status_id in [STAGE_FOR_SALE]:
                     await bot.send_message(chat, CONTENT_FOR_SALE1)
                     await bot.send_message(chat, CONTENT_FOR_SALE2)
-                    amo_share_outgoing_message(
+                    AMO_functions.amo_share_outgoing_message(
                         str(chat), user_name, name, CONTENT_FOR_SALE1)
-                    amo_share_outgoing_message(
+                    AMO_functions.amo_share_outgoing_message(
                         str(chat), user_name, name, CONTENT_FOR_SALE2)
                 if status_id not in [STAGE_IN_AMO_1, STAGE_FOR_MANAGER, STAGE_FOR_SALE, STAGE_FOR_CLOSED_DEALS, STAGE_FOR_DONE_DEALS]:
                     if status_id == STAGE_IN_AMO_3:
@@ -206,18 +286,18 @@ async def checking_for_new_message(bot):
                 file_name = list_for_new_message[5]
                 is_chat_availible = await bot.get_chat(chat)
                 if not is_chat_availible:
-                    response = amo_share_incoming_message(str(chat), str(user_name), str(
+                    response = AMO_functions.amo_share_incoming_message(str(chat), str(user_name), str(
                         name), 'Системное сообщение: чат удален пользователем')
                     if response != 200:
                         await asyncio.sleep(5)
-                        response = amo_share_incoming_message(str(chat), str(user_name), str(
+                        response = AMO_functions.amo_share_incoming_message(str(chat), str(user_name), str(
                             name), 'Системное сообщение: чат удален пользователем')
                         if response != 200:
                             await bot.send_message(CHAT_FOR_LOGS, f'Could not send message to amo about chat_deleted_by_user for {user_name}')
                 if amo_message in ['start']:
                     if BotActivity.check_existing(str(chat)):
                         BotActivity.update_true(str(chat))
-                    if not has_history_with_gpt(chat):
+                    if not Tables.has_history_with_gpt(chat):
                         await function_for_start(chat, user_name, name, bot)
                     list_for_new_message.clear()
                     BotActivity.delete_first_message()
@@ -244,8 +324,8 @@ async def checking_for_new_message(bot):
                     BotActivity.delete_first_message()
                     continue
                 if amo_message in ['clear']:
-                    delete_history(chat)
-                    delete_history_table(chat)
+                    Tables.delete_history(chat)
+                    Tables.delete_history_table(chat)
                     if BotActivity.check_shorted_history_exists(chat):
                         BotActivity.delete_shorted_history(chat)
                     if BotActivity.check_new_prompt_exists(chat):
@@ -264,9 +344,10 @@ async def checking_for_new_message(bot):
                     list_for_new_message.clear()
                     BotActivity.delete_first_message()
                     continue
-                amo_message = replace_single_quotes_with_double(amo_message)
+                amo_message = Tables.replace_single_quotes_with_double(
+                    amo_message)
                 await bot.send_message(chat, str(amo_message))
-                insert_history(chat, 'manager', str(amo_message))
+                Tables.insert_history(chat, 'manager', str(amo_message))
                 list_for_new_message.clear()
                 BotActivity.delete_first_message()
             except Exception as e:
@@ -279,11 +360,11 @@ async def checking_for_new_message(bot):
                 if not user_name or not name:
                     user_name = BotActivity.get_username_by_chat(chat)
                     name = BotActivity.get_name_by_chat(chat)
-                response = amo_share_outgoing_message(str(chat), str(user_name), str(
+                response = AMO_functions.amo_share_outgoing_message(str(chat), str(user_name), str(
                     name), '❗️❗️❗️Системное сообщение: отправка предыдущего сообщения не удалась ❗️❗️❗️'+'Бот заблокирован пользователем!!!')
                 if response != 200:
                     await asyncio.sleep(5)
-                    response = amo_share_outgoing_message(str(chat), str(user_name), str(
+                    response = AMO_functions.amo_share_outgoing_message(str(chat), str(user_name), str(
                         name), '❗️❗️❗️Системное сообщение: чат удален пользователем❗️❗️❗️')
                     if response != 200:
                         await bot.send_message(CHAT_FOR_LOGS, f'Could not send message from amo to {user_name}')
@@ -299,7 +380,8 @@ async def function_for_stage_start(chat, user_name, name, status_id, bot):
         new = []
         new.append(
             {'role': 'user', 'content': 'действуй согласно системному промпту'})
-        insert_history(chat, 'client', 'действуй согласно системному промпту')
+        Tables.insert_history(
+            chat, 'client', 'действуй согласно системному промпту')
         list_with_system_prompt = []
         for item in AMO_STAGES:
             if status_id == item:
@@ -319,7 +401,7 @@ async def function_for_stage_start(chat, user_name, name, status_id, bot):
                 {'role': 'system', 'content': CONTENT1})
         list_with_system_prompt.extend(new)
         if list_with_system_prompt[0].get('content') == CONTENT3:
-            delete_history(chat)
+            Tables.delete_history(chat)
             if BotActivity.check_shorted_history_exists(chat):
                 BotActivity.delete_shorted_history(chat)
             lead_id = BotActivity.get_lead_id_by_chat(chat)
@@ -333,23 +415,23 @@ async def function_for_stage_start(chat, user_name, name, status_id, bot):
         else:
             chat_gpt_response = get_chat_gpt_response(list_with_system_prompt)
         if not chat_gpt_response and chat_gpt_response != 0:
-            amo_share_outgoing_message(
+            AMO_functions.amo_share_outgoing_message(
                 str(chat), str(user_name), str(name), '❗️❗️❗Ошибка сервера по которому получаем анализ, необходим анализ для этой сделки❗️❗️❗️')
             await bot.send_message(CHAT_FOR_LOGS, f'Could not get answer from gpt or analysis for {user_name}')
             lead_id = BotActivity.get_lead_id_by_chat(chat)
             amo_change_lead_status(lead_id, STAGE_FOR_MANAGER)
         if chat_gpt_response != 0:
-            response = amo_share_outgoing_message(str(chat), str(
+            response = AMO_functions.amo_share_outgoing_message(str(chat), str(
                 user_name), str(name), str(chat_gpt_response))
             if response != 200:
                 await asyncio.sleep(5)
-                response = amo_share_outgoing_message(
+                response = AMO_functions.amo_share_outgoing_message(
                     str(chat), str(user_name), str(name), str(chat_gpt_response))
                 if response != 200:
                     await bot.send_message(CHAT_FOR_LOGS, f'Could not share answer from gpt to amo for {user_name}')
         if chat_gpt_response:
             if not flag_analysis:
-                insert_history(chat, 'gpt', chat_gpt_response)
+                Tables.insert_history(chat, 'gpt', chat_gpt_response)
             if 'PAY' not in chat_gpt_response:
                 if flag_analysis and not BotActivity.check_has_analysis(chat):
                     await bot.send_message(chat, chat_gpt_response, reply_markup=None)
@@ -358,12 +440,12 @@ async def function_for_stage_start(chat, user_name, name, status_id, bot):
                     await bot.send_message(chat, chat_gpt_response, reply_markup=None)
             if flag_analysis:
                 await bot.send_message(chat, TEXT_AFTER_ANALYSIS1, reply_markup=None)
-                amo_share_outgoing_message(
+                AMO_functions.amo_share_outgoing_message(
                     str(chat), str(user_name), str(name), TEXT_AFTER_ANALYSIS1)
                 await bot.send_message(chat, TEXT_AFTER_ANALYSIS2, reply_markup=None)
-                amo_share_outgoing_message(
+                AMO_functions.amo_share_outgoing_message(
                     str(chat), str(user_name), str(name), TEXT_AFTER_ANALYSIS2)
-                insert_history(chat, 'gpt', TEXT_AFTER_ANALYSIS2)
+                Tables.insert_history(chat, 'gpt', TEXT_AFTER_ANALYSIS2)
     except Exception as e:
         logging.error(str(e), exc_info=True)
 
@@ -378,7 +460,7 @@ async def handle_user_messages(message, bot):
     await asyncio.sleep(15)
     united_user_message = str(BotActivity.get_messages_from_client(chat_id))
     BotActivity.delete_messages_from_client(chat_id)
-    insert_history(chat_id, 'client', united_user_message)
+    Tables.insert_history(chat_id, 'client', united_user_message)
     user_name = message.from_user.username
     first_name = message.from_user.first_name
     if not user_name or not first_name:
@@ -394,7 +476,8 @@ async def handle_user_messages(message, bot):
             list_with_system_prompt = getting_list_with_sysprompt(CONTENT1)
             if BotActivity.check_shorted_history_exists(chat_id):
                 shorted_rows = BotActivity.get_shorted_rows_history(chat_id)
-                history_list = get_not_shorted_history(chat_id, shorted_rows)
+                history_list = Tables.get_not_shorted_history(
+                    chat_id, shorted_rows)
                 await bot.send_chat_action(chat_id, "typing")
                 final_prompt = CONTENT + \
                     BotActivity.get_shorted_history(chat_id)
@@ -424,7 +507,7 @@ async def handle_user_messages(message, bot):
                 token_count = len(encoding.encode(
                     str(list_with_system_prompt)))
                 shorted_rows = BotActivity.get_shorted_rows_history(chat_id)
-                history_list = get_not_shorted_history(
+                history_list = Tables.get_not_shorted_history(
                     chat_id, shorted_rows - 1)
             chat_gpt_response = get_chat_gpt_response(
                 list_with_system_prompt+history_list)
@@ -470,20 +553,20 @@ async def handle_user_messages(message, bot):
                 await bot.send_message(CHAT_FOR_LOGS, f'Could not get answer from gpt for {user_name}')
             if all(word not in chat_gpt_response for word in ['ANALYSIS', 'LINK', 'ALL', 'DESIGN', 'COMPLEX', 'SECRET', 'PAY', 'NO']):
                 await bot.send_message(chat_id, chat_gpt_response, reply_markup=None, disable_web_page_preview=True)
-            response = amo_share_outgoing_message(
+            response = AMO_functions.amo_share_outgoing_message(
                 str(chat_id), user_name, first_name, str(chat_gpt_response))
             if response != 200:
                 await asyncio.sleep(5)
-                response = amo_share_outgoing_message(
+                response = AMO_functions.amo_share_outgoing_message(
                     str(chat_id), user_name, first_name, str(chat_gpt_response))
                 if response != 200:
                     await bot.send_message(CHAT_FOR_LOGS, f'Could not share answer from gpt to amo for {user_name}')
             BotActivity.update_time_recent_message(chat_id)
-            insert_history(chat_id, 'gpt', str(chat_gpt_response))
+            Tables.insert_history(chat_id, 'gpt', str(chat_gpt_response))
             free_for_new_messages(chat_id)
         except Exception as e:
             logging.error(str(e), exc_info=True)
-            amo_share_outgoing_message(
+            AMO_functions.amo_share_outgoing_message(
                 str(chat_id), user_name, first_name, 'Системное сообщение: ошибка на стороне ИИ, обработка им сообщений остановлена')
             BotActivity.update_false(str(chat_id))
             free_for_new_messages(chat_id)
@@ -524,49 +607,6 @@ async def helper_for_handle_amo_message(text, data: IncomingMessage, request: Re
         raise HTTPException(404, "Not Found")
 
 
-async def send_message_to_amo(chat_id, user_name, first_name, message, bot):
-    try:
-        amo_share_incoming_message(
-            str(chat_id), user_name, first_name, message.text)
-    except Exception as e:
-        logging.error(str(e), exc_info=True)
-        await bot.send_message(CHAT_FOR_LOGS, f'Could not send message to amo for {user_name}' + str(e))
-
-
-async def start_command(message, bot):
-    chat_id = message.chat.id
-    BotActivity.add_disactive(str(chat_id))
-    user_name = message.from_user.username
-    first_name = message.from_user.first_name
-    if not BotActivity.get_username_by_chat(chat_id):
-        BotActivity.add_new_username_and_name(chat_id)
-        if not first_name or not user_name:
-            user_name = str(BotActivity.get_username_by_chat(chat_id))
-            first_name = str(BotActivity.get_name_by_chat(chat_id))
-    else:
-        user_name = str(message.from_user.username)
-        first_name = str(message.from_user.first_name)
-    try:
-        create_new_history_table(chat_id)
-        await bot.send_message(chat_id, TEXT_FOR_START)
-        insert_history(chat_id, 'gpt', TEXT_FOR_START)
-
-        # при создании чата amo_chat_create получаем conversation_id и чат id
-        response = amo_chat_create(str(chat_id), user_name, first_name)
-        if response.status_code != 200:
-            await asyncio.sleep(5)
-            response = amo_chat_create(
-                str(chat_id), user_name, first_name)
-            if response.status_code != 200:
-                await bot.send_message(CHAT_FOR_LOGS, f'Could not create chat in amo for {user_name}')
-        received_data = json.loads(response.text)
-        user_id = received_data.get('id')
-        BotActivity.add_in_users(user_name, first_name, chat_id, user_id)
-    except Exception as e:
-        logging.error(str(e), exc_info=True)
-        await bot.send_message(CHAT_FOR_LOGS, f'Could not complete the start command in telegram for {user_name}'+str(e))
-
-
 def get_double_shorted_message_from_gpt(text):
     chat_gpt_short_response = ''
     message_to_be_short = 'сейчас я пришлю конспект диалога, сократи его без потери смысла до 2000 слов:' + \
@@ -597,7 +637,7 @@ async def cut_history_with_gpt(chat_id: int, history_list, bot):
         string_for_gpt)
     if not chat_gpt_short_response:
         await bot.send_message(CHAT_FOR_LOGS, f'Could not get answer from gpt to cut history')
-    shorted_rows = get_last_id_history(chat_id)
+    shorted_rows = Tables.get_last_id_history(chat_id)
     BotActivity.add_shorted_history(
         chat_id, chat_gpt_short_response, shorted_rows)
     if history_already_exist:
@@ -628,7 +668,7 @@ def send_text_to_amo(chat_id, lead_id, text):
     user_name = BotActivity.get_username_by_user_id(user_id)
     name = BotActivity.get_name_by_user_id(user_id)
     if user_name and name:
-        amo_share_outgoing_message(
+        AMO_functions.amo_share_outgoing_message(
             str(chat_id), user_name, name, text)
 
 
@@ -663,15 +703,15 @@ async def function_for_initializing_conversation(chat, user_name, name, bot):
     try:
         new = []
         list_with_system_prompt = []
-        last_message_from_client = get_last_message_from_client(chat)
+        last_message_from_client = Tables.get_last_message_from_client(chat)
         if last_message_from_client:
             new.append(
                 {'role': 'user', 'content': last_message_from_client})
-            insert_history(chat, 'client', last_message_from_client)
+            Tables.insert_history(chat, 'client', last_message_from_client)
         else:
             new.append(
                 {'role': 'user', 'content': 'привет'})
-            insert_history(chat, 'client', 'привет')
+            Tables.insert_history(chat, 'client', 'привет')
         if BotActivity.check_new_prompt_exists(chat):
             prompt = BotActivity.get_new_prompt(chat)
         else:
@@ -681,42 +721,21 @@ async def function_for_initializing_conversation(chat, user_name, name, bot):
         chat_gpt_response = get_chat_gpt_response(list_with_system_prompt)
         if not chat_gpt_response:
             await bot.send_message(CHAT_FOR_LOGS, f'Could not get answer from gpt for {user_name}')
-        insert_history(chat, 'gpt', chat_gpt_response)
+        Tables.insert_history(chat, 'gpt', chat_gpt_response)
         await bot.send_message(chat, chat_gpt_response, reply_markup=None)
-        response = amo_share_outgoing_message(str(chat), str(
+        response = AMO_functions.amo_share_outgoing_message(str(chat), str(
             user_name), str(name), str(chat_gpt_response))
         if response != 200:
             await asyncio.sleep(5)
-            response = amo_share_outgoing_message(
+            response = AMO_functions.amo_share_outgoing_message(
                 str(chat), str(user_name), str(name), str(chat_gpt_response))
             if response != 200:
                 await bot.send_message(CHAT_FOR_LOGS, f'Could not share answer from gpt to amo for {user_name}')
-        insert_history(chat, 'gpt', chat_gpt_response)
+        Tables.insert_history(chat, 'gpt', chat_gpt_response)
     except Exception as e:
         logging.error(str(e), exc_info=True)
-        response = amo_share_outgoing_message(str(chat), str(
+        response = AMO_functions.amo_share_outgoing_message(str(chat), str(
             user_name), str(name), f'Не могу возобновить диалог по причине: {str(e)}')
-
-
-async def share_first_messages_with_amo(message, bot):
-    chat_id = message.chat.id
-    user_name = message.from_user.username
-    first_name = message.from_user.first_name
-    if not user_name or not first_name:
-        user_name = str(BotActivity.get_username_by_chat(chat_id))
-        first_name = str(BotActivity.get_name_by_chat(chat_id))
-    else:
-        user_name = str(message.from_user.username)
-        first_name = str(message.from_user.first_name)
-    await send_message_to_amo(chat_id, user_name, first_name, message, bot)
-    response = amo_share_outgoing_message(
-        str(chat_id), user_name, first_name, TEXT_FOR_START)
-    if response != 200:
-        await asyncio.sleep(5)
-        response = amo_share_outgoing_message(
-            str(chat_id), user_name, first_name, TEXT_FOR_START)
-        if response != 200:
-            await bot.send_message(CHAT_FOR_LOGS, f'Could not share TEXT for START for {user_name}')
 
 
 async def get_group_analysis(lead_id, user_name, bot):
@@ -735,7 +754,7 @@ async def function_for_start(chat, user_name, name, bot):
         new = []
         new.append(
             {'role': 'user', 'content': 'привет'})
-        insert_history(chat, 'client', 'привет')
+        Tables.insert_history(chat, 'client', 'привет')
         list_with_system_prompt = []
         if BotActivity.check_new_prompt_exists(chat):
             prompt = BotActivity.get_new_prompt(chat)
@@ -746,27 +765,19 @@ async def function_for_start(chat, user_name, name, bot):
         chat_gpt_response = get_chat_gpt_response(list_with_system_prompt)
         if not chat_gpt_response:
             await bot.send_message(CHAT_FOR_LOGS, f'Could not get answer from gpt for {user_name}')
-        insert_history(chat, 'gpt', chat_gpt_response)
+        Tables.insert_history(chat, 'gpt', chat_gpt_response)
         await bot.send_message(chat, chat_gpt_response, reply_markup=None)
-        response = amo_share_outgoing_message(str(chat), str(
+        response = AMO_functions.amo_share_outgoing_message(str(chat), str(
             user_name), str(name), str(chat_gpt_response))
         if response != 200:
             await asyncio.sleep(5)
-            response = amo_share_outgoing_message(
+            response = AMO_functions.amo_share_outgoing_message(
                 str(chat), str(user_name), str(name), str(chat_gpt_response))
             if response != 200:
                 await bot.send_message(CHAT_FOR_LOGS, f'Could not share answer from gpt to amo for {user_name}')
-        insert_history(chat, 'gpt', chat_gpt_response)
+        Tables.insert_history(chat, 'gpt', chat_gpt_response)
     except Exception as e:
         logging.error(str(e), exc_info=True)
-
-
-async def amo_double_incoming_message(chat_id, user_name, first_name, message, bot):
-    await asyncio.sleep(5)
-    response = amo_share_incoming_message(
-        str(chat_id), user_name, first_name, message.text)
-    if response != 200:
-        await bot.send_message(CHAT_FOR_LOGS, f'Could not send message to amo for {user_name}')
 
 
 def get_shorted_message_from_gpt(text):
@@ -864,7 +875,7 @@ async def helper_for_handle_amo_stage_change(request: Request, function_for_init
                         chat, user_name, name, status_id)
                     if status_id == STAGE_IN_AMO_1:
                         await asyncio.sleep(150)
-                        if not get_last_message_from_gpt(chat):
+                        if not Tables.get_last_message_from_gpt(chat):
                             await function_for_initializing_conversation(chat, user_name, name)
                 elif status_id in [STAGE_FOR_MANAGER]:
                     BotActivity.add_recent_message(chat, status_id)
@@ -897,7 +908,7 @@ def getting_list_with_sysprompt(content):
 
 
 def getting_history_list(chat_id):
-    new_history_list = get_history(chat_id)
+    new_history_list = Tables.get_history(chat_id)
     return new_history_list
 
 
@@ -927,11 +938,6 @@ def check_string_contains_substring(substring, string):
         else:
             pass
     return True if i / len(words) >= 0.6 else False
-
-
-def check_chat_existing_in_database(chat_id):
-    if not BotActivity.check_existing(chat_id):
-        BotActivity.add_disactive(chat_id)
 
 
 def free_for_new_messages(chat_id):
