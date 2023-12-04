@@ -1,0 +1,42 @@
+import requests
+from all_requests.access_token import update_token
+from dotenv import load_dotenv
+import os
+import json
+
+def get_uuid(full_link):
+    url = full_link
+    parts = url.split('/')
+    uuid_index = parts.index('download') + 2
+
+    if len(parts) > uuid_index:
+        uuid = parts[uuid_index]
+    else:
+        uuid = ''
+    return uuid
+
+def get_link_for_download(uuid):
+    load_dotenv()
+    access_token = str(os.getenv('ACCESS_TOKEN'))
+    get_url = "https://drive-b.amocrm.ru/v1.0/files/" + str(uuid)
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+    response = requests.get(get_url, headers=headers)
+
+    if response.status_code != 200:
+        update_token()
+        response = requests.get(get_url, headers=headers)
+    if response.status_code == 200:
+        value = response.text
+    else:
+        print(f"Произошла ошибка. Код ошибки: {response.status_code}")
+        print("Сообщение об ошибке:")
+        value = response.text
+    try:
+        data_dict = json.loads(value)
+        download_link = data_dict.get("_links", {}).get("download", {}).get("href")
+    except Exception as e:
+        print(e)
+        download_link = 0
+    return download_link

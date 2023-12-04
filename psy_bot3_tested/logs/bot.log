@@ -1,0 +1,432 @@
+2023-09-13 12:52:03,221 - root - ERROR - '_embedded' - Line 262
+2023-09-13 12:52:03,221 - root - INFO - cant get entity_id in access_token.py - Line 263
+2023-09-13 12:52:04,847 - root - ERROR - '_embedded' - Line 349
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Desktop/chat-gpt-project/vkbot/all_requests/access_token.py", line 346, in get_amo_user_id
+    returning_value = data['_embedded']['chats'][0]['chat_id']
+KeyError: '_embedded'
+2023-09-13 12:52:04,855 - root - INFO - cant get amo_user_id in access_token.py - Line 350
+2023-09-13 12:52:26,847 - root - ERROR - [100] One of the parameters specified was missing or invalid: group_id is undefined - Line 413
+2023-09-13 13:45:07,568 - amo_in_logger - INFO - Время запроса: 2023-09-13 13:45 , Запрос: URL=https://amojo.amocrm.ru/v2/origin/custom/77cee4a3-57ff-48b0-aebb-ebb025491003_a79933f4-9e39-4438-bc0a-89ffc20b0b55/chats, Тело={'event_type': 'new_message', 'payload': {'timestamp': 1694601906, 'msec_timestamp': 1694601906915, 'msgid': 'intt-p096c4tr3934', 'conversation_id': 'skt-8e3e7640-49af-4448-a2c6-551959937', 'sender': {'id': 'skt-1376265f-86df-4c49-a0c3-timefordeals', 'profile': {'phone': '+79151112990', 'email': 'example6.client@example.com'}, 'name': 'Александр'}, 'message': {'type': 'text', 'text': 'так'}, 'silent': False}}, Ответ={"new_message":{"msgid":"0fe40d83-8c62-4bfe-b45d-1403aabbacd0","ref_id":"intt-p096c4tr3934"}} - Line 249
+2023-09-13 13:45:49,970 - amo_in_logger - INFO - Время запроса: 2023-09-13 13:45 , Запрос: URL=https://amojo.amocrm.ru/v2/origin/custom/77cee4a3-57ff-48b0-aebb-ebb025491003_a79933f4-9e39-4438-bc0a-89ffc20b0b55/chats, Тело={'event_type': 'new_message', 'payload': {'timestamp': 1694601950, 'msec_timestamp': 1694601950506, 'msgid': 'intt-2hr0li7uqxzm', 'conversation_id': 'skt-8e3e7640-49af-4448-a2c6-551959937', 'sender': {'id': 'skt-1376265f-86df-4c49-a0c3', 'name': 'Bot', 'ref_id': 'f1910c7f-b1e0-4184-bd09-c7def2a9109a'}, 'receiver': {'id': 'skt-1376265f-86df-4c49-a0c3-timefordeals', 'name': 'Александр', 'profile': {'phone': '+79151112990', 'email': 'example6.client@example.com'}}, 'message': {'type': 'text', 'text': 'Здравствуйте! Меня зовут Надежда, я ваш персональный менеджер в SMM-агентстве LeadGram. Я на связи с понедельника по пятницу с 09:00 до 17:00 по МСК. \n\nЯ готова провести для вас бесплатный анализ вашей группы ВКонтакте, чтобы выявить сильные и слабые места и понять, как увеличить продажи. Для этого мне нужна ссылка на вашу группу. \n\nАнализ будет готов в течение суток.'}, 'silent': False}}, Ответ={"new_message":{"msgid":"6a8c1d3a-7052-40e8-ac54-b3b8a217ee9e","ref_id":"intt-2hr0li7uqxzm"}} - Line 345
+2023-09-13 13:46:12,896 - root - INFO - Stopping the application... - Line 921
+2023-09-13 13:46:12,898 - asyncio - ERROR - Exception in callback <TaskWakeupMethWrapper object at 0x104864dc0>(<_GatheringFu...rdInterrupt()>)
+handle: <Handle <TaskWakeupMethWrapper object at 0x104864dc0>(<_GatheringFu...rdInterrupt()>)> - Line 1707
+Traceback (most recent call last):
+  File "vkcom.py", line 919, in main
+    await asyncio.gather(flask_task, bot_task, messages_task, amo_token_update_task, recent_messages_task)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/base_events.py", line 603, in run_until_complete
+    self.run_forever()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/base_events.py", line 570, in run_forever
+    self._run_once()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/base_events.py", line 1859, in _run_once
+    handle._run()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/events.py", line 81, in _run
+    self._context.run(self._callback, *self._args)
+  File "vkcom.py", line 388, in echo_bot
+    for message in longpoll.listen():
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/vk_api/longpoll.py", line 619, in listen
+    for event in self.check():
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/vk_api/longpoll.py", line 555, in check
+    response = self.session.get(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/requests/sessions.py", line 600, in get
+    return self.request("GET", url, **kwargs)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/requests/sessions.py", line 587, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/requests/sessions.py", line 701, in send
+    r = adapter.send(request, **kwargs)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/requests/adapters.py", line 489, in send
+    resp = conn.urlopen(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/urllib3/connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/urllib3/connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/http/client.py", line 1344, in getresponse
+    response.begin()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/http/client.py", line 307, in begin
+    version, status, reason = self._read_status()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/http/client.py", line 268, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/events.py", line 81, in _run
+    self._context.run(self._callback, *self._args)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/tasks.py", line 718, in cancel
+    if child.cancel():
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/tasks.py", line 718, in cancel
+    if child.cancel():
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/tasks.py", line 718, in cancel
+    if child.cancel():
+  [Previous line repeated 492 more times]
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/tasks.py", line 714, in cancel
+    if self.done():
+RecursionError: maximum recursion depth exceeded while calling a Python object
+2023-10-13 17:06:32,254 - root - ERROR - '_embedded' - Line 262
+2023-10-13 17:06:32,257 - root - INFO - cant get entity_id in access_token.py - Line 263
+2023-10-13 17:06:32,872 - root - ERROR - '_embedded' - Line 378
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Desktop/chat-gpt-project/psybot/all_requests_psy/access_token.py", line 375, in get_amo_user_id
+    returning_value = data['_embedded']['chats'][0]['chat_id']
+KeyError: '_embedded'
+2023-10-13 17:06:32,879 - root - INFO - cant get amo_user_id in access_token.py - Line 379
+2023-10-13 17:06:34,220 - aiogram.dispatcher.dispatcher - INFO - Start polling. - Line 358
+2023-10-13 17:14:57,867 - aiogram.dispatcher.dispatcher - WARNING - Polling is stopped. - Line 405
+2023-10-13 17:27:25,375 - root - ERROR - '_embedded' - Line 262
+2023-10-13 17:27:25,375 - root - INFO - cant get entity_id in access_token.py - Line 263
+2023-10-13 17:27:26,037 - root - ERROR - '_embedded' - Line 378
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Desktop/chat-gpt-project/psybot/all_requests_psy/access_token.py", line 375, in get_amo_user_id
+    returning_value = data['_embedded']['chats'][0]['chat_id']
+KeyError: '_embedded'
+2023-10-13 17:27:26,044 - root - INFO - cant get amo_user_id in access_token.py - Line 379
+2023-10-13 17:27:27,481 - aiogram.dispatcher.dispatcher - INFO - Start polling. - Line 358
+2023-10-13 17:30:23,405 - aiogram.dispatcher.dispatcher - WARNING - Polling is stopped. - Line 405
+2023-10-13 17:30:25,943 - root - ERROR - '_embedded' - Line 262
+2023-10-13 17:30:25,943 - root - INFO - cant get entity_id in access_token.py - Line 263
+2023-10-13 17:30:26,892 - root - ERROR - '_embedded' - Line 378
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Desktop/chat-gpt-project/psybot/all_requests_psy/access_token.py", line 375, in get_amo_user_id
+    returning_value = data['_embedded']['chats'][0]['chat_id']
+KeyError: '_embedded'
+2023-10-13 17:30:26,898 - root - INFO - cant get amo_user_id in access_token.py - Line 379
+2023-10-13 17:30:28,307 - aiogram.dispatcher.dispatcher - INFO - Start polling. - Line 358
+2023-10-13 17:30:54,103 - aiogram.dispatcher.dispatcher - WARNING - Polling is stopped. - Line 405
+2023-10-13 17:30:56,289 - root - ERROR - '_embedded' - Line 262
+2023-10-13 17:30:56,289 - root - INFO - cant get entity_id in access_token.py - Line 263
+2023-10-13 17:30:56,881 - root - ERROR - '_embedded' - Line 378
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Desktop/chat-gpt-project/psybot/all_requests_psy/access_token.py", line 375, in get_amo_user_id
+    returning_value = data['_embedded']['chats'][0]['chat_id']
+KeyError: '_embedded'
+2023-10-13 17:30:56,886 - root - INFO - cant get amo_user_id in access_token.py - Line 379
+2023-10-13 17:30:58,271 - aiogram.dispatcher.dispatcher - INFO - Start polling. - Line 358
+2023-10-13 17:31:20,044 - amo_in_logger - INFO - Время запроса: 2023-10-13 17:31 , Запрос: URL=https://amojo.amocrm.ru/v2/origin/custom/77cee4a3-57ff-48b0-aebb-ebb025491003_a79933f4-9e39-4438-bc0a-89ffc20b0b55/chats, Тело={'event_type': 'new_message', 'payload': {'timestamp': 1697207480, 'msec_timestamp': 1697207480413, 'msgid': 'intt-moj3v1g1kgrx', 'conversation_id': 'skt-8e3e7640-49af-4448-a2c7-1752794926', 'sender': {'id': 'skt-1376265f-86df-4c49-a0c3', 'name': 'Bot', 'ref_id': 'f1910c7f-b1e0-4184-bd09-c7def2a9109a'}, 'receiver': {'id': 'skt-1376265f-86df-4c49-a0c4-elpasotoro', 'name': 'Александр', 'profile': {'email': 'example-psy.client@example.com'}}, 'message': {'type': 'text', 'text': 'Здравствуйте! Меня зовут Ксения, я профессиональный психолог. Чем я могу вам помочь сегодня?'}, 'silent': False}}, Ответ={"new_message":{"msgid":"dac643ae-c987-4fae-823c-6407ebd618cd","ref_id":"intt-moj3v1g1kgrx"}} - Line 387
+2023-10-13 17:32:17,403 - aiogram.dispatcher.dispatcher - WARNING - Polling is stopped. - Line 405
+2023-10-13 17:34:23,828 - root - ERROR - '_embedded' - Line 262
+2023-10-13 17:34:23,829 - root - INFO - cant get entity_id in access_token.py - Line 263
+2023-10-13 17:34:24,382 - root - ERROR - '_embedded' - Line 378
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Desktop/chat-gpt-project/psybot/all_requests_psy/access_token.py", line 375, in get_amo_user_id
+    returning_value = data['_embedded']['chats'][0]['chat_id']
+KeyError: '_embedded'
+2023-10-13 17:34:24,388 - root - INFO - cant get amo_user_id in access_token.py - Line 379
+2023-10-13 17:34:25,599 - aiogram.dispatcher.dispatcher - INFO - Start polling. - Line 358
+2023-10-13 17:35:02,996 - aiogram.dispatcher.dispatcher - WARNING - Polling is stopped. - Line 405
+2023-10-13 17:35:05,742 - root - ERROR - '_embedded' - Line 262
+2023-10-13 17:35:05,742 - root - INFO - cant get entity_id in access_token.py - Line 263
+2023-10-13 17:35:06,715 - root - ERROR - '_embedded' - Line 378
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Desktop/chat-gpt-project/psybot/all_requests_psy/access_token.py", line 375, in get_amo_user_id
+    returning_value = data['_embedded']['chats'][0]['chat_id']
+KeyError: '_embedded'
+2023-10-13 17:35:06,721 - root - INFO - cant get amo_user_id in access_token.py - Line 379
+2023-10-13 17:35:08,129 - aiogram.dispatcher.dispatcher - INFO - Start polling. - Line 358
+2023-10-13 17:35:59,109 - aiogram.dispatcher.dispatcher - WARNING - Polling is stopped. - Line 405
+2023-10-13 17:36:01,729 - root - ERROR - '_embedded' - Line 262
+2023-10-13 17:36:01,730 - root - INFO - cant get entity_id in access_token.py - Line 263
+2023-10-13 17:36:02,572 - root - ERROR - '_embedded' - Line 378
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Desktop/chat-gpt-project/psybot/all_requests_psy/access_token.py", line 375, in get_amo_user_id
+    returning_value = data['_embedded']['chats'][0]['chat_id']
+KeyError: '_embedded'
+2023-10-13 17:36:02,577 - root - INFO - cant get amo_user_id in access_token.py - Line 379
+2023-10-13 17:36:04,147 - aiogram.dispatcher.dispatcher - INFO - Start polling. - Line 358
+2023-10-13 17:36:18,788 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates. - Line 390
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2023-10-13 17:36:49,032 - amo_in_logger - INFO - Время запроса: 2023-10-13 17:36 , Запрос: URL=https://amojo.amocrm.ru/v2/origin/custom/77cee4a3-57ff-48b0-aebb-ebb025491003_a79933f4-9e39-4438-bc0a-89ffc20b0b55/chats, Тело={'event_type': 'new_message', 'payload': {'timestamp': 1697207809, 'msec_timestamp': 1697207809445, 'msgid': 'intt-e49j9ls70l7s', 'conversation_id': 'skt-8e3e7640-49af-4448-a2c7-1752794926', 'sender': {'id': 'skt-1376265f-86df-4c49-a0c3', 'name': 'Bot', 'ref_id': 'f1910c7f-b1e0-4184-bd09-c7def2a9109a'}, 'receiver': {'id': 'skt-1376265f-86df-4c49-a0c4-elpasotoro', 'name': 'Александр', 'profile': {'email': 'example-psy.client@example.com'}}, 'message': {'type': 'text', 'text': 'Здравствуйте! Меня зовут Ксения, я профессиональный психолог. Чем я могу вам помочь сегодня?'}, 'silent': False}}, Ответ={"new_message":{"msgid":"803dba13-32e1-44b5-97a7-2f882cc6f0b1","ref_id":"intt-e49j9ls70l7s"}} - Line 387
+2023-10-13 17:37:53,377 - aiogram.dispatcher.dispatcher - WARNING - Polling is stopped. - Line 405
+2023-10-13 17:37:55,946 - root - ERROR - '_embedded' - Line 262
+2023-10-13 17:37:55,946 - root - INFO - cant get entity_id in access_token.py - Line 263
+2023-10-13 17:37:56,537 - root - ERROR - '_embedded' - Line 378
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Desktop/chat-gpt-project/psybot/all_requests_psy/access_token.py", line 375, in get_amo_user_id
+    returning_value = data['_embedded']['chats'][0]['chat_id']
+KeyError: '_embedded'
+2023-10-13 17:37:56,544 - root - INFO - cant get amo_user_id in access_token.py - Line 379
+2023-10-13 17:37:57,874 - aiogram.dispatcher.dispatcher - INFO - Start polling. - Line 358
+2023-10-13 17:39:27,422 - aiogram.dispatcher.dispatcher - WARNING - Polling is stopped. - Line 405
+2023-10-13 17:39:29,866 - root - ERROR - '_embedded' - Line 262
+2023-10-13 17:39:29,866 - root - INFO - cant get entity_id in access_token.py - Line 263
+2023-10-13 17:39:30,401 - root - ERROR - '_embedded' - Line 378
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Desktop/chat-gpt-project/psybot/all_requests_psy/access_token.py", line 375, in get_amo_user_id
+    returning_value = data['_embedded']['chats'][0]['chat_id']
+KeyError: '_embedded'
+2023-10-13 17:39:30,406 - root - INFO - cant get amo_user_id in access_token.py - Line 379
+2023-10-13 17:39:31,666 - aiogram.dispatcher.dispatcher - INFO - Start polling. - Line 358
+2023-10-13 17:39:56,504 - amo_in_logger - INFO - Время запроса: 2023-10-13 17:39 , Запрос: URL=https://amojo.amocrm.ru/v2/origin/custom/77cee4a3-57ff-48b0-aebb-ebb025491003_a79933f4-9e39-4438-bc0a-89ffc20b0b55/chats, Тело={'event_type': 'new_message', 'payload': {'timestamp': 1697207996, 'msec_timestamp': 1697207996936, 'msgid': 'intt-j2t1o3nb675k', 'conversation_id': 'skt-8e3e7640-49af-4448-a2c7-1752794926', 'sender': {'id': 'skt-1376265f-86df-4c49-a0c3', 'name': 'Bot', 'ref_id': 'f1910c7f-b1e0-4184-bd09-c7def2a9109a'}, 'receiver': {'id': 'skt-1376265f-86df-4c49-a0c4-elpasotoro', 'name': 'Александр', 'profile': {'email': 'example-psy.client@example.com'}}, 'message': {'type': 'text', 'text': 'Здравствуйте! Меня зовут Ксения, я профессиональный психолог. Чем я могу вам помочь сегодня?'}, 'silent': False}}, Ответ={"new_message":{"msgid":"2257fadb-f9aa-421a-8db4-4e40b8584852","ref_id":"intt-j2t1o3nb675k"}} - Line 387
+2023-10-13 17:40:52,582 - aiogram.dispatcher.dispatcher - WARNING - Polling is stopped. - Line 405
+2023-10-13 17:40:54,982 - root - ERROR - '_embedded' - Line 262
+2023-10-13 17:40:54,982 - root - INFO - cant get entity_id in access_token.py - Line 263
+2023-10-13 17:40:55,538 - root - ERROR - '_embedded' - Line 378
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Desktop/chat-gpt-project/psybot/all_requests_psy/access_token.py", line 375, in get_amo_user_id
+    returning_value = data['_embedded']['chats'][0]['chat_id']
+KeyError: '_embedded'
+2023-10-13 17:40:55,544 - root - INFO - cant get amo_user_id in access_token.py - Line 379
+2023-10-13 17:40:56,876 - aiogram.dispatcher.dispatcher - INFO - Start polling. - Line 358
+2023-10-13 17:42:03,841 - aiogram.dispatcher.dispatcher - WARNING - Polling is stopped. - Line 405
+2023-10-13 17:42:12,848 - root - ERROR - '_embedded' - Line 262
+2023-10-13 17:42:12,848 - root - INFO - cant get entity_id in access_token.py - Line 263
+2023-10-13 17:42:13,829 - root - ERROR - '_embedded' - Line 378
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Desktop/chat-gpt-project/psybot/all_requests_psy/access_token.py", line 375, in get_amo_user_id
+    returning_value = data['_embedded']['chats'][0]['chat_id']
+KeyError: '_embedded'
+2023-10-13 17:42:13,836 - root - INFO - cant get amo_user_id in access_token.py - Line 379
+2023-10-13 17:42:15,134 - aiogram.dispatcher.dispatcher - INFO - Start polling. - Line 358
+2023-10-13 17:42:31,971 - amo_in_logger - INFO - Время запроса: 2023-10-13 17:42 , Запрос: URL=https://amojo.amocrm.ru/v2/origin/custom/77cee4a3-57ff-48b0-aebb-ebb025491003_a79933f4-9e39-4438-bc0a-89ffc20b0b55/chats, Тело={'event_type': 'new_message', 'payload': {'timestamp': 1697208152, 'msec_timestamp': 1697208152394, 'msgid': 'intt-va4t1w9pjqze', 'conversation_id': 'skt-8e3e7640-49af-4448-a2c7-1752794926', 'sender': {'id': 'skt-1376265f-86df-4c49-a0c3', 'name': 'Bot', 'ref_id': 'f1910c7f-b1e0-4184-bd09-c7def2a9109a'}, 'receiver': {'id': 'skt-1376265f-86df-4c49-a0c4-elpasotoro', 'name': 'Александр', 'profile': {'email': 'example-psy.client@example.com'}}, 'message': {'type': 'text', 'text': 'Здравствуйте! Меня зовут Ксения, я профессиональный психолог. Чем я могу вам помочь сегодня?'}, 'silent': False}}, Ответ={"new_message":{"msgid":"62d23633-9c21-4859-85a2-605416561245","ref_id":"intt-va4t1w9pjqze"}} - Line 387
+2023-10-13 17:42:48,598 - aiogram.dispatcher.dispatcher - WARNING - Polling is stopped. - Line 405
+2023-10-13 22:51:45,191 - aiogram.dispatcher.dispatcher - INFO - Start polling. - Line 358
+2023-10-13 22:51:50,383 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates. - Line 390
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2023-10-13 22:52:00,536 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates. - Line 390
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2023-10-13 22:52:10,678 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates. - Line 390
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2023-10-13 22:52:20,804 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates. - Line 390
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2023-10-13 22:52:30,951 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates. - Line 390
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2023-10-13 22:52:32,838 - aiogram.dispatcher.dispatcher - WARNING - Polling is stopped. - Line 405
+2023-10-13 22:52:37,824 - aiogram.dispatcher.dispatcher - INFO - Start polling. - Line 358
+2023-10-13 22:52:43,051 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates. - Line 390
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2023-10-13 22:52:53,197 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates. - Line 390
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2023-10-13 22:53:03,327 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates. - Line 390
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2023-10-13 22:53:13,462 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates. - Line 390
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2023-10-13 22:53:23,679 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates. - Line 390
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2023-10-13 22:53:33,811 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates. - Line 390
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2023-10-13 22:53:43,939 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates. - Line 390
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2023-10-13 22:53:54,076 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates. - Line 390
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2023-10-13 22:54:04,201 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates. - Line 390
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+2023-10-13 22:54:05,146 - aiogram.dispatcher.dispatcher - WARNING - Polling is stopped. - Line 405
+2023-10-13 22:54:09,761 - aiogram.dispatcher.dispatcher - INFO - Start polling. - Line 358
+2023-10-13 22:54:12,165 - aiogram.dispatcher.dispatcher - WARNING - Polling is stopped. - Line 405
+2023-10-20 18:36:50,979 - root - ERROR - list index out of range - Line 280
+2023-10-20 18:36:50,982 - root - INFO - cant get entity_id in access_token.py - Line 281
+2023-10-20 18:36:51,577 - root - ERROR - list index out of range - Line 396
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Desktop/copy-chat-gpt-project/psy_bot/all_requests_psy/access_token.py", line 393, in get_amo_user_id
+    returning_value = data['_embedded']['chats'][0]['chat_id']
+IndexError: list index out of range
+2023-10-20 18:36:51,582 - root - INFO - cant get amo_user_id in access_token.py - Line 397
+2023-10-20 18:36:53,241 - aiogram.dispatcher.dispatcher - INFO - Start polling. - Line 358
+2023-10-20 18:36:56,549 - aiogram.dispatcher.dispatcher - WARNING - Polling is stopped. - Line 405

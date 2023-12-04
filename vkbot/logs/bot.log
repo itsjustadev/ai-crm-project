@@ -1,0 +1,77 @@
+2023-09-13 12:52:03,221 - root - ERROR - '_embedded' - Line 262
+2023-09-13 12:52:03,221 - root - INFO - cant get entity_id in access_token.py - Line 263
+2023-09-13 12:52:04,847 - root - ERROR - '_embedded' - Line 349
+Traceback (most recent call last):
+  File "/Users/itsjustadev/Desktop/chat-gpt-project/vkbot/all_requests/access_token.py", line 346, in get_amo_user_id
+    returning_value = data['_embedded']['chats'][0]['chat_id']
+KeyError: '_embedded'
+2023-09-13 12:52:04,855 - root - INFO - cant get amo_user_id in access_token.py - Line 350
+2023-09-13 12:52:26,847 - root - ERROR - [100] One of the parameters specified was missing or invalid: group_id is undefined - Line 413
+2023-09-13 13:45:07,568 - amo_in_logger - INFO - Время запроса: 2023-09-13 13:45 , Запрос: URL=https://amojo.amocrm.ru/v2/origin/custom/77cee4a3-57ff-48b0-aebb-ebb025491003_a79933f4-9e39-4438-bc0a-89ffc20b0b55/chats, Тело={'event_type': 'new_message', 'payload': {'timestamp': 1694601906, 'msec_timestamp': 1694601906915, 'msgid': 'intt-p096c4tr3934', 'conversation_id': 'skt-8e3e7640-49af-4448-a2c6-551959937', 'sender': {'id': 'skt-1376265f-86df-4c49-a0c3-timefordeals', 'profile': {'phone': '+79151112990', 'email': 'example6.client@example.com'}, 'name': 'Александр'}, 'message': {'type': 'text', 'text': 'так'}, 'silent': False}}, Ответ={"new_message":{"msgid":"0fe40d83-8c62-4bfe-b45d-1403aabbacd0","ref_id":"intt-p096c4tr3934"}} - Line 249
+2023-09-13 13:45:49,970 - amo_in_logger - INFO - Время запроса: 2023-09-13 13:45 , Запрос: URL=https://amojo.amocrm.ru/v2/origin/custom/77cee4a3-57ff-48b0-aebb-ebb025491003_a79933f4-9e39-4438-bc0a-89ffc20b0b55/chats, Тело={'event_type': 'new_message', 'payload': {'timestamp': 1694601950, 'msec_timestamp': 1694601950506, 'msgid': 'intt-2hr0li7uqxzm', 'conversation_id': 'skt-8e3e7640-49af-4448-a2c6-551959937', 'sender': {'id': 'skt-1376265f-86df-4c49-a0c3', 'name': 'Bot', 'ref_id': 'f1910c7f-b1e0-4184-bd09-c7def2a9109a'}, 'receiver': {'id': 'skt-1376265f-86df-4c49-a0c3-timefordeals', 'name': 'Александр', 'profile': {'phone': '+79151112990', 'email': 'example6.client@example.com'}}, 'message': {'type': 'text', 'text': 'Здравствуйте! Меня зовут Надежда, я ваш персональный менеджер в SMM-агентстве LeadGram. Я на связи с понедельника по пятницу с 09:00 до 17:00 по МСК. \n\nЯ готова провести для вас бесплатный анализ вашей группы ВКонтакте, чтобы выявить сильные и слабые места и понять, как увеличить продажи. Для этого мне нужна ссылка на вашу группу. \n\nАнализ будет готов в течение суток.'}, 'silent': False}}, Ответ={"new_message":{"msgid":"6a8c1d3a-7052-40e8-ac54-b3b8a217ee9e","ref_id":"intt-2hr0li7uqxzm"}} - Line 345
+2023-09-13 13:46:12,896 - root - INFO - Stopping the application... - Line 921
+2023-09-13 13:46:12,898 - asyncio - ERROR - Exception in callback <TaskWakeupMethWrapper object at 0x104864dc0>(<_GatheringFu...rdInterrupt()>)
+handle: <Handle <TaskWakeupMethWrapper object at 0x104864dc0>(<_GatheringFu...rdInterrupt()>)> - Line 1707
+Traceback (most recent call last):
+  File "vkcom.py", line 919, in main
+    await asyncio.gather(flask_task, bot_task, messages_task, amo_token_update_task, recent_messages_task)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/base_events.py", line 603, in run_until_complete
+    self.run_forever()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/base_events.py", line 570, in run_forever
+    self._run_once()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/base_events.py", line 1859, in _run_once
+    handle._run()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/events.py", line 81, in _run
+    self._context.run(self._callback, *self._args)
+  File "vkcom.py", line 388, in echo_bot
+    for message in longpoll.listen():
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/vk_api/longpoll.py", line 619, in listen
+    for event in self.check():
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/vk_api/longpoll.py", line 555, in check
+    response = self.session.get(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/requests/sessions.py", line 600, in get
+    return self.request("GET", url, **kwargs)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/requests/sessions.py", line 587, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/requests/sessions.py", line 701, in send
+    r = adapter.send(request, **kwargs)
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/requests/adapters.py", line 489, in send
+    resp = conn.urlopen(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/urllib3/connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "/Users/itsjustadev/Library/Python/3.8/lib/python/site-packages/urllib3/connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/http/client.py", line 1344, in getresponse
+    response.begin()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/http/client.py", line 307, in begin
+    version, status, reason = self._read_status()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/http/client.py", line 268, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/events.py", line 81, in _run
+    self._context.run(self._callback, *self._args)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/tasks.py", line 718, in cancel
+    if child.cancel():
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/tasks.py", line 718, in cancel
+    if child.cancel():
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/tasks.py", line 718, in cancel
+    if child.cancel():
+  [Previous line repeated 492 more times]
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.8/lib/python3.8/asyncio/tasks.py", line 714, in cancel
+    if self.done():
+RecursionError: maximum recursion depth exceeded while calling a Python object
