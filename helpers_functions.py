@@ -102,7 +102,7 @@ class BOT:
 
 class Database:
     @staticmethod
-    def check_chat_existing_in_database(chat_id):
+    def check_chat_existing(chat_id):
         if not BotActivity.check_existing(chat_id):
             BotActivity.add_disactive(chat_id)
 

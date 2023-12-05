@@ -22,9 +22,9 @@ load_dotenv()
 openai.api_key = TOKEN_FOR_CHAT_GPT
 bot = Bot(token=TOKEN_FOR_BOT)
 dp = Dispatcher(bot, storage=MemoryStorage())
+app = FastAPI()
 BotActivity.free_all_bot()
 BotActivity.delete_none_stage()
-app = FastAPI()
 
 
 async def chat_join_request_handler(chat_join_request: types.ChatJoinRequest):
@@ -51,7 +51,7 @@ async def chat_join_request_handler(chat_join_request: types.ChatJoinRequest):
 async def upload_file(message: types.Message):
     try:
         chat_id = message.chat.id
-        Database.check_chat_existing_in_database(str(chat_id))
+        Database.check_chat_existing(str(chat_id))
         user_name = message.from_user.username
         first_name = message.from_user.first_name
         if not user_name or not first_name:
@@ -103,7 +103,7 @@ async def upload_file(message: types.Message):
 async def voice_handler(message: types.Message):
     try:
         chat_id = message.chat.id
-        Database.check_chat_existing_in_database(str(chat_id))
+        Database.check_chat_existing(str(chat_id))
         user_name = message.from_user.username
         first_name = message.from_user.first_name
         if not user_name or not first_name:
@@ -156,7 +156,7 @@ async def voice_handler(message: types.Message):
 async def handle_photo(message: types.Message):
     try:
         chat_id = message.chat.id
-        Database.check_chat_existing_in_database(str(chat_id))
+        Database.check_chat_existing(str(chat_id))
         user_name = message.from_user.username
         first_name = message.from_user.first_name
         if not user_name or not first_name:
