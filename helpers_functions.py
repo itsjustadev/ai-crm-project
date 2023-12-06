@@ -12,7 +12,7 @@ from aiogram.dispatcher import Dispatcher
 import openai
 import logging
 import asyncio
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import Request, HTTPException
 import databases as BotActivity
 import requests
 import json
@@ -24,6 +24,31 @@ import httpx
 from constants import *
 import pathlib
 import all_requests.access_token as AMO_connection
+
+
+logging.basicConfig(filename=LOGS_PATH, level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s - Line %(lineno)d')
+
+logger_for_stages = logging.getLogger('logger_for_stages')
+logger_for_stages.setLevel(logging.INFO)
+handler1 = logging.FileHandler('logger_for_stages.log')
+formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+handler1.setFormatter(formatter)
+logger_for_stages.addHandler(handler1)
+
+logger_controling_deals = logging.getLogger('logger_controling_deals')
+logger_controling_deals.setLevel(logging.INFO)
+handler2 = logging.FileHandler('logger_controling_deals.log')
+formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+handler2.setFormatter(formatter)
+logger_controling_deals.addHandler(handler2)
+
+logger_for_stage_start = logging.getLogger('logger_for_stage_start')
+logger_for_stage_start.setLevel(logging.INFO)
+handler3 = logging.FileHandler('logger_for_stage_start.log')
+formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+handler3.setFormatter(formatter)
+logger_for_stage_start.addHandler(handler3)
 
 
 class AMO:
@@ -63,7 +88,12 @@ class AMO:
             response = AMO_functions.amo_share_outgoing_message(
                 str(chat_id), user_name, first_name, TEXT_FOR_START)
             if response != 200:
+                logging.error(
+                    f'Could not share TEXT for START for {user_name}', exc_info=True)
                 await bot.send_message(CHAT_FOR_LOGS, f'Could not share TEXT for START for {user_name}')
+        else:
+            logger_controling_deals.info(
+                f'AMO text_for_start shared with {chat_id} {user_name} {first_name}'+str(datetime.datetime.now()), exc_info=True)
 
 
 class BOT:
@@ -82,9 +112,14 @@ class BOT:
             user_name = str(message.from_user.username)
             first_name = str(message.from_user.first_name)
         try:
-            Tables.create_new_history_table(chat_id)
+            is_good = Tables.create_new_history_table(chat_id)
+            if is_good:
+                logger_controling_deals.info(
+                    f'history table created for {chat_id} '+str(datetime.datetime.now()), exc_info=True)
             await bot.send_message(chat_id, TEXT_FOR_START)
-            Tables.insert_history(chat_id, 'gpt', TEXT_FOR_START)
+            is_good = Tables.insert_history(chat_id, 'gpt', TEXT_FOR_START)
+            logger_controling_deals.info(
+                f'history inserted for {chat_id} '+str(datetime.datetime.now()), exc_info=True)
             # при создании чата amo_chat_create получаем conversation_id и чат id
             response = AMO_functions.amo_chat_create(
                 str(chat_id), user_name, first_name)
@@ -94,9 +129,16 @@ class BOT:
                     str(chat_id), user_name, first_name)
                 if response.status_code != 200:
                     await bot.send_message(CHAT_FOR_LOGS, f'Could not create chat in amo for {user_name}')
+            else:
+                logger_controling_deals.info(
+                    f'AMO chat created for {chat_id} {user_name} {first_name}'+str(datetime.datetime.now()), exc_info=True)
             received_data = json.loads(response.text)
             user_id = received_data.get('id')
-            BotActivity.add_in_users(user_name, first_name, chat_id, user_id)
+            is_good = BotActivity.add_in_users(
+                user_name, first_name, chat_id, user_id)
+            if is_good:
+                logger_controling_deals.info(
+                    f'User added un tables for {chat_id} {user_name} {first_name}'+str(datetime.datetime.now()), exc_info=True)
         except Exception as e:
             logging.error(str(e), exc_info=True)
             await bot.send_message(CHAT_FOR_LOGS, f'Could not complete the start command in telegram for {user_name}'+str(e))
@@ -293,6 +335,9 @@ async def receiver_chat_gpt(message, bot):
     BotActivity.add_message_from_client(chat_id, message.text)
     if BotActivity.is_bot_free(chat_id):
         asyncio.create_task(handle_user_messages(message, bot))
+    else:
+        logger_controling_deals.info(
+            f'Bot is not free for {chat_id} '+str(datetime.datetime.now()), exc_info=True)
 
 
 # обработчик для принятия заявки в канал
@@ -308,6 +353,9 @@ async def chat_join_request_handler(chat_join_request: types.ChatJoinRequest, bo
             'user_id': user_id
         }
         response = requests.post(url, data=payload)
+        if response.status_code == 200:
+            logger_controling_deals.info(
+                f'chat_join_request approved for {chat_id} '+str(datetime.datetime.now()), exc_info=True)
         message = MessageForStart(text='/start', chat_id=user_id, username=username,
                                   first_name=first_name, reply_to_message=None)
         await receiver_chat_gpt(message, bot)
@@ -444,6 +492,8 @@ async def checking_for_new_message(bot):
                 user_name = list_for_stage[1]
                 name = list_for_stage[2]
                 status_id = list_for_stage[3]
+                logger_controling_deals.info(
+                    f'AMO stage change handling started for {chat} status handling {status_id} '+str(datetime.datetime.now()), exc_info=True)
                 if status_id == STAGE_IN_AMO_4:
                     await bot.send_message(chat, MESSAGE_FOR_SECRET, parse_mode=types.ParseMode.MARKDOWN)
                     with open(DOCUMENT_PATH, 'rb') as document_file:
@@ -494,6 +544,8 @@ async def checking_for_new_message(bot):
                 media = list_for_new_message[4]
                 file_name = list_for_new_message[5]
                 is_chat_availible = await bot.get_chat(chat)
+                logger_controling_deals.info(
+                    f'Hanling message from manager for {chat} message {amo_message} '+str(datetime.datetime.now()), exc_info=True)
                 if not is_chat_availible:
                     response = AMO_functions.amo_share_incoming_message(str(chat), str(user_name), str(
                         name), 'Системное сообщение: чат удален пользователем')
@@ -614,8 +666,13 @@ async def function_for_stage_start(chat, user_name, name, status_id, bot):
             if BotActivity.check_shorted_history_exists(chat):
                 BotActivity.delete_shorted_history(chat)
             lead_id = BotActivity.get_lead_id_by_chat(chat)
+            logger_controling_deals.info(
+                f'Function for stage start for {chat} with system prompt {list_with_system_prompt} '+str(datetime.datetime.now()), exc_info=True)
             if not BotActivity.check_has_analysis(chat):
                 chat_gpt_response = await get_group_analysis(lead_id, user_name, bot)
+                if chat_gpt_response:
+                    logger_controling_deals.info(
+                        f'Analysis getted for {chat} '+str(datetime.datetime.now()), exc_info=True)
             else:
                 chat_gpt_response = ''
             flag_analysis = 1
@@ -624,6 +681,8 @@ async def function_for_stage_start(chat, user_name, name, status_id, bot):
         else:
             chat_gpt_response = get_chat_gpt_response(list_with_system_prompt)
         if not chat_gpt_response and chat_gpt_response != 0:
+            logger_controling_deals.info(
+                f'Analysis for {chat} is may not done, here it is: {chat_gpt_response} '+str(datetime.datetime.now()), exc_info=True)
             AMO_functions.amo_share_outgoing_message(
                 str(chat), str(user_name), str(name), '❗️❗️❗Ошибка сервера по которому получаем анализ, необходим анализ для этой сделки❗️❗️❗️')
             await bot.send_message(CHAT_FOR_LOGS, f'Could not get answer from gpt or analysis for {user_name}')
@@ -668,8 +727,13 @@ async def handle_user_messages(message, bot):
     await bot.send_chat_action(chat_id, "typing")
     await asyncio.sleep(15)
     united_user_message = str(BotActivity.get_messages_from_client(chat_id))
+    logger_controling_deals.info(
+        f'Messages getted from {chat_id} {united_user_message} '+str(datetime.datetime.now()), exc_info=True)
     BotActivity.delete_messages_from_client(chat_id)
-    Tables.insert_history(chat_id, 'client', united_user_message)
+    is_good = Tables.insert_history(chat_id, 'client', united_user_message)
+    if is_good:
+        logger_controling_deals.info(
+            f'History inserted in tables for messages from {chat_id} '+str(datetime.datetime.now()), exc_info=True)
     user_name = message.from_user.username
     first_name = message.from_user.first_name
     if not user_name or not first_name:
@@ -720,45 +784,67 @@ async def handle_user_messages(message, bot):
                     chat_id, shorted_rows - 1)
             chat_gpt_response = get_chat_gpt_response(
                 list_with_system_prompt+history_list)
+            if chat_gpt_response:
+                logger_controling_deals.info(
+                    f'CHATGPT request done for {chat_id} system_prompt{list_with_system_prompt} '+str(datetime.datetime.now()), exc_info=True)
             if 'LINK' in chat_gpt_response:
                 lead_id = BotActivity.get_lead_id_by_chat(chat_id)
                 if lead_id:
                     keyword = 'LINK'
-                    if keyword in chat_gpt_response:
-                        index = chat_gpt_response.index(
-                            keyword) + len(keyword) + 1
-                        vk_link = chat_gpt_response[index:].split()[0]
-                        status_code = amo_change_vk_link(lead_id, vk_link)
-                        if status_code != 200:
-                            print(f'didnt change vklink for {lead_id} lead')
-                        amo_change_lead_status(lead_id, STAGE_IN_AMO_2)
+                    index = chat_gpt_response.index(
+                        keyword) + len(keyword) + 1
+                    vk_link = chat_gpt_response[index:].split()[0]
+                    status_code = amo_change_vk_link(lead_id, vk_link)
+                    if status_code != 200:
+                        print(f'didnt change vklink for {lead_id} lead')
                     else:
-                        logging.info('no link in chat_gpt_response')
+                        logger_controling_deals.info(
+                            f'Changed vklink for {chat_id} '+str(datetime.datetime.now()), exc_info=True)
+                    is_good = amo_change_lead_status(lead_id, STAGE_IN_AMO_2)
+                    if is_good:
+                        logger_controling_deals.info(
+                            f'Changed status for {chat_id} to stage_in_amo2 '+str(datetime.datetime.now()), exc_info=True)
             if 'ANALYSIS' in chat_gpt_response:
                 lead_id = BotActivity.get_lead_id_by_chat(chat_id)
                 if lead_id:
-                    amo_change_lead_status(lead_id, STAGE_IN_AMO_3)
+                    is_good = amo_change_lead_status(lead_id, STAGE_IN_AMO_3)
+                    if is_good:
+                        logger_controling_deals.info(
+                            f'Changed status for {chat_id} to stage_in_amo3 '+str(datetime.datetime.now()), exc_info=True)
                 else:
                     logging.info('no link in chat_gpt_response')
             if 'DESIGN' in chat_gpt_response or 'SECRET' in chat_gpt_response:
                 await cut_history_with_gpt(chat_id, history_list, bot)
                 lead_id = BotActivity.get_lead_id_by_chat(chat_id)
                 if lead_id:
-                    amo_change_lead_status(lead_id, STAGE_IN_AMO_4)
+                    is_good = amo_change_lead_status(lead_id, STAGE_IN_AMO_4)
+                    if is_good:
+                        logger_controling_deals.info(
+                            f'Changed status for {chat_id} to stage_in_amo4 '+str(datetime.datetime.now()), exc_info=True)
                 else:
                     logging.info('no link in chat_gpt_response')
             if 'PAY' in chat_gpt_response:
                 lead_id = BotActivity.get_lead_id_by_chat(chat_id)
                 if lead_id:
-                    amo_change_lead_status(lead_id, STAGE_FOR_SALE)
+                    is_good = amo_change_lead_status(lead_id, STAGE_FOR_SALE)
+                    if is_good:
+                        logger_controling_deals.info(
+                            f'Changed status for {chat_id} to stage_for_sale '+str(datetime.datetime.now()), exc_info=True)
                     if BotActivity.check_existing(str(chat)):
                         BotActivity.update_false(str(chat))
+                        logger_controling_deals.info(
+                            f'bot activity turned off for {chat_id} '+str(datetime.datetime.now()), exc_info=True)
                 else:
                     logging.info('no link in chat_gpt_response')
             if any(word in chat_gpt_response for word in ['COMPLEX', 'ALL', 'NO', 'PHONE']):
                 lead_id = BotActivity.get_lead_id_by_chat(chat_id)
-                amo_change_lead_status(lead_id, STAGE_FOR_MANAGER)
+                is_good = amo_change_lead_status(lead_id, STAGE_FOR_MANAGER)
+                if is_good:
+                    logger_controling_deals.info(
+                        f'Changed status for {chat_id} to stage_for_manager '+str(datetime.datetime.now()), exc_info=True)
             if not chat_gpt_response:
+                logger_controling_deals.info(
+                    f'NO chat_gpt response for {chat_id} '+str(datetime.datetime.now()), exc_info=True)
                 await bot.send_message(CHAT_FOR_LOGS, f'Could not get answer from gpt for {user_name}')
             if all(word not in chat_gpt_response for word in ['ANALYSIS', 'LINK', 'ALL', 'DESIGN', 'COMPLEX', 'SECRET', 'PAY', 'NO']):
                 await bot.send_message(chat_id, chat_gpt_response, reply_markup=None, disable_web_page_preview=True)
@@ -770,6 +856,9 @@ async def handle_user_messages(message, bot):
                     str(chat_id), user_name, first_name, str(chat_gpt_response))
                 if response != 200:
                     await bot.send_message(CHAT_FOR_LOGS, f'Could not share answer from gpt to amo for {user_name}')
+            else:
+                logger_controling_deals.info(
+                    f'AMO successfully shared chat_gpt response to amo for {chat_id} '+str(datetime.datetime.now()), exc_info=True)
             BotActivity.update_time_recent_message(chat_id)
             Tables.insert_history(chat_id, 'gpt', str(chat_gpt_response))
             free_for_new_messages(chat_id)
@@ -780,6 +869,8 @@ async def handle_user_messages(message, bot):
             BotActivity.update_false(str(chat_id))
             free_for_new_messages(chat_id)
     else:
+        logger_controling_deals.info(
+            f'bot is not active for {chat_id} '+str(datetime.datetime.now()), exc_info=True)
         free_for_new_messages(chat_id)
         pass
 
@@ -806,8 +897,11 @@ async def helper_for_handle_amo_message(text, data: IncomingMessage, request: Re
             if not name or not username or name == 'None' or username == 'None':
                 username = BotActivity.get_username_by_chat(chat_id)
                 name = BotActivity.get_name_by_chat(chat_id)
-            BotActivity.add_new_message(int(chat_id), str(new_message), str(
+            is_good = BotActivity.add_new_message(int(chat_id), str(new_message), str(
                 username), str(name), str(media_download_link), str(file_name))
+            if is_good:
+                logger_controling_deals.info(
+                    f'Get new message from AMO for {chat_id} {new_message} '+str(datetime.datetime.now()), exc_info=True)
             # print(list_for_new_message)
             return {"message": "JSON received"}
         except Exception as e:
@@ -1028,6 +1122,8 @@ async def helper_for_psy_handle_amo_message(data: IncomingMessage, request: Requ
                 name = psy_get_name(chat_id)
             psy_add_new_message(int(chat_id), str(new_message), str(
                 username), str(name), str(media_download_link), str(file_name))
+            logger_controling_deals.info(
+                f'Message from amo getted by the server for {chat_id} message {new_message} '+str(datetime.datetime.now()), exc_info=True)
             return {"message": "JSON received"}
         except Exception as e:
             logging.error(str(e), exc_info=True)
@@ -1046,11 +1142,14 @@ async def helper_for_redirect_leads(request: Request):
             user_id = get_amo_user(URL_ENTITY_BASE, lead_id)
             email = get_user_email(user_id)
             if email == 'example6.client@example.com':
-                amo_pipeline_change(lead_id, PIPELINE_ID, STATUS_ID)
+                is_good = amo_pipeline_change(lead_id, PIPELINE_ID, STATUS_ID)
+                if is_good:
+                    logger_controling_deals.info(
+                        f'AMO pipeline changed from unsorted to test pipeline {lead_id} '+str(datetime.datetime.now()), exc_info=True)
             if email == 'example-psy.client@example.com':
                 amo_pipeline_change(lead_id, 7347266, 61137218)
         except Exception as e:
-            print(str(e))
+            logging.error(str(e), exc_info=True)
 
 
 async def helper_for_handle_amo_stage_change(request: Request, function_for_initializing_conversation):
@@ -1074,6 +1173,8 @@ async def helper_for_handle_amo_stage_change(request: Request, function_for_init
                     psy_add_new_lead_id(chat, lead_id)
             else:
                 chat = BotActivity.get_chat_by_user_id(user_id)
+                logger_controling_deals.info(
+                    f'Stage changed for {chat} на {status_id} '+str(datetime.datetime.now()), exc_info=True)
                 if status_id in [STAGE_IN_AMO_1, STAGE_IN_AMO_2, STAGE_IN_AMO_3, STAGE_IN_AMO_4]:
                     enable_project0(str(chat))
                     user_name = BotActivity.get_username_by_user_id(user_id)
@@ -1107,7 +1208,7 @@ async def helper_for_handle_amo_stage_change(request: Request, function_for_init
                     if BotActivity.check_existing(str(chat)):
                         BotActivity.update_false(str(chat))
         except Exception as e:
-            print(str(e))
+            logging.error(str(e), exc_info=True)
 
 
 def getting_list_with_sysprompt(content):
@@ -1133,7 +1234,7 @@ def get_chat_gpt_response(array_with_objects):
             chat_gpt_response = completion.choices[0].message.content
             break
         except Exception as e:
-            print("An error occurred:", str(e))
+            logging.error(str(e), exc_info=True)
             time.sleep(5)
     return chat_gpt_response
 
