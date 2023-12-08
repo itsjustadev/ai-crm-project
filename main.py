@@ -4,29 +4,23 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import openai
 import logging
 import asyncio
-import uvicorn
-from fastapi import FastAPI
 import databases as BotActivity
 from constants import *
 from helpers_functions import *
 from server_routes import router
+from fastapi import FastAPI
+import uvicorn
 
 
-update_token()
 openai.api_key = TOKEN_FOR_CHAT_GPT
-bot = Bot(token=TOKEN_FOR_BOT)
+bot = Bot(token=TOKEN_FOR_BOT5)
 dp = Dispatcher(bot, storage=MemoryStorage())
 app = FastAPI()
-
-# в переменную router включены все созданные эндпоинты сервера
 app.include_router(router)
+
+
 BotActivity.free_all_bot()
 BotActivity.delete_none_stage()
-
-
-# запуск сервера
-def run_server():
-    uvicorn.run(app, host="0.0.0.0", port=80)
 
 
 # запуск бота
@@ -34,15 +28,18 @@ async def run_bot():
     await dp.start_polling()
 
 
+def run_server():
+    uvicorn.run(app, host="0.0.0.0", port=8080)
+
+
 # группировка всех задач вместе
 async def main():
     await skip_updates(bot)
     loop = asyncio.get_event_loop()
-    flask_task = loop.run_in_executor(None, run_server)
     bot_task = loop.create_task(run_bot())
+    flask_task = loop.run_in_executor(None, run_server)
     messages_task = loop.create_task(checking_messages(bot))
-    recent_messages_task = loop.create_task(check_recent_messages(bot))
-    amo_token_update_task = loop.create_task(amo_token_update())
+
     # регистрация обработчиков
     dp.register_chat_join_request_handler(
         lambda chat_join_request: chat_join_request_handler(chat_join_request, bot))
@@ -55,7 +52,7 @@ async def main():
     dp.register_message_handler(
         lambda message: handle_photo(message, bot), content_types=types.ContentType.PHOTO)
     try:
-        await asyncio.gather(flask_task, bot_task, messages_task, amo_token_update_task, recent_messages_task)
+        await asyncio.gather(bot_task, flask_task, messages_task)
     except KeyboardInterrupt:
         logging.info('Stopping the application...')
         for task in asyncio.all_tasks():
