@@ -1,11 +1,20 @@
 # coding: utf8
-from logging import error
 from sqlalchemy import create_engine, inspect, MetaData, Table, Column, Integer, String, insert, text, select
 from sqlalchemy.orm import declarative_base
+import os
+from dotenv import load_dotenv
 
-engine = create_engine('sqlite:///bot_activity.db')
+load_dotenv()
+username = str(os.getenv('USERNAME'))
+password = str(os.getenv('PASSWORD'))
+host = str(os.getenv('HOST'))
+port = str(os.getenv('PORT'))
+database = str(os.getenv('DATABASE'))
+
+connection_string = f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}'
+engine = create_engine(connection_string)
+
 Base = declarative_base()
-
 metadata = MetaData()
 
 inspector = inspect(engine)
