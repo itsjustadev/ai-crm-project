@@ -6,10 +6,11 @@ import logging
 import asyncio
 import uvicorn
 from fastapi import FastAPI
-import databases as BotActivity
+import databases.databases as BotActivity
 from constants import *
 from all_functions import *
-from server_routes import router
+from message_handlers import *
+from server.server_routes import router
 
 
 update_token()
