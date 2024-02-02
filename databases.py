@@ -1,21 +1,27 @@
-from datetime import datetime, timedelta, time
-from typing import DefaultDict
+from datetime import datetime, timedelta
 from aiogram.types import user
-from aiogram.types.base import String
 from sqlalchemy import create_engine, Column, String, Text, Integer, Boolean
 from sqlalchemy.orm import sessionmaker, declarative_base
 import random
 import string
-
 from sqlalchemy.sql.sqltypes import DateTime
+import os
+from dotenv import load_dotenv
 
-# Создаем соединение с базой данных
-engine = create_engine('sqlite:///bot_activity.db')
+load_dotenv()
+username = str(os.getenv('USERNAME'))
+password = str(os.getenv('PASSWORD'))
+host = str(os.getenv('HOST'))
+port = str(os.getenv('PORT'))
+database = str(os.getenv('DATABASE'))
+
+connection_string = f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}'
+engine = create_engine(connection_string)
 
 # Создаем базовый класс моделей
 Base = declarative_base()
 
-# Определяем модель таблицы
+# Определяем модели
 
 
 class BotActivity(Base):
@@ -76,7 +82,6 @@ class IsBotFree(Base):
     __tablename__ = 'is_bot_free'
     chat_id = Column(Integer, primary_key=True)
     is_bot_free = Column(Boolean, default=True)
-    
 
 
 class RecentMessages(Base):
@@ -95,12 +100,14 @@ class ListOfNewMessages(Base):
     name = Column(String, default=None)
     media_download_link = Column(String, default=None)
     file_name = Column(String, default=None)
-    
+
+
 class Analysis(Base):
     __tablename__ = 'analysis'
     chat_id = Column(Integer, primary_key=True)
     has_analysis = Column(Boolean, default=True)
-    
+
+
 class DealsToClose(Base):
     __tablename__ = 'deals_to_close'
     chat_id = Column(Integer, primary_key=True)
@@ -124,25 +131,29 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
+
 def add_has_analysis(chat_id):
     new_addition = Analysis(
         chat_id=chat_id, has_analysis=True)
     session.merge(new_addition)
     session.commit()
-    
+
+
 def add_in_deal_to_close(chat_id, stage_close):
     new_addition = DealsToClose(
         chat_id=chat_id, count_to_close_deal=stage_close)
     session.merge(new_addition)
     session.commit()
-    
+
+
 def get_count_to_close(chat_id: int):
     user = session.query(DealsToClose).filter_by(chat_id=chat_id).first()
     if user:
         return user.count_to_close_deal
     else:
         return 0
-    
+
+
 def delete_count_to_close(chat_id: int):
     user = session.query(DealsToClose).filter_by(chat_id=chat_id).first()
     if user:
@@ -150,19 +161,25 @@ def delete_count_to_close(chat_id: int):
         session.commit()
     else:
         return 0
-    
-def check_has_analysis(chat_id: int):
+
+
+def check_has_analysis(chat_id):
     user = session.query(Analysis).filter_by(chat_id=chat_id).first()
     if user:
         return user.has_analysis
     else:
         return False
 
+
 def add_new_message(chat_id, new_message, username, name, media_link, file_name):
-    new_addition = ListOfNewMessages(chat_id=chat_id, new_message=new_message,
-                                     username=username, name=name, media_download_link=media_link, file_name=file_name)
-    session.add(new_addition)
-    session.commit()
+    try:
+        new_addition = ListOfNewMessages(chat_id=chat_id, new_message=new_message,
+                                         username=username, name=name, media_download_link=media_link, file_name=file_name)
+        session.add(new_addition)
+        session.commit()
+        return True
+    except:
+        return False
 
 
 def add_shorted_history(chat_id, shorted_history, shorted_rows: int):
@@ -256,6 +273,11 @@ def check_new_prompt_exists(chat_id):
     return existing_user is not None
 
 
+def check_user_exists(chat_id: int):
+    find_one = session.query(Users).filter_by(chat_id=chat_id).first()
+    return True if find_one else False
+
+
 def check_new_stage_exists():
     existing_user = session.query(
         AmoNewStages).first()
@@ -283,22 +305,6 @@ def add_new_username_and_name(chat_id):
     new_addition = UserNames(chat_id=chat_id, username=username, name=name)
     session.merge(new_addition)
     session.commit()
-    
-def add_new_username(chat_id):
-    username = generate_random_string(12)
-    while check_username_exists(username):
-        username = generate_random_string(12)
-    new_addition = UserNames(chat_id=chat_id, username=username)
-    session.merge(new_addition)
-    session.commit()
-    
-def add_new_name(chat_id):
-    name = 'Клиент' + generate_random_digits(8)
-    while check_name_exists(name):
-        name = 'Клиент' + generate_random_digits(8)
-    new_addition = UserNames(chat_id=chat_id, name=name)
-    session.merge(new_addition)
-    session.commit()
 
 
 def add_new_amo_stage(chat_id, username, name, status_id):
@@ -324,35 +330,10 @@ def add_recent_message(chat_id, stage_in_amo):
             session.commit()
     else:
         new_addition = RecentMessages(
-                chat_id=chat_id, time=datetime.now(), stage_in_amo=stage_in_amo)
+            chat_id=chat_id, time=datetime.now(), stage_in_amo=stage_in_amo)
         session.merge(new_addition)
         session.commit()
-        
-def add_recent_message_another_time(chat_id, stage_in_amo, time_hours):
-    result = session.query(RecentMessages).filter_by(chat_id=chat_id).first()
-    if result:
-        if result.stage_in_amo not in ['142', '143']:
-            new_addition = RecentMessages(
-                chat_id=chat_id, time=datetime.now()+timedelta(hours=time_hours), stage_in_amo=stage_in_amo)
-            session.merge(new_addition)
-            session.commit()
-            
-# def add_recent_message_zero_time(chat_id, stage_in_amo):
-#     result = session.query(RecentMessages).filter_by(chat_id=chat_id).first()
-#     if result:
-#         if result.stage_in_amo not in ['142', '143']:
-#             new_addition = RecentMessages(
-#                 chat_id=chat_id, time=datetime.combine(datetime.today(), time(0,0)), stage_in_amo=stage_in_amo)
-#             session.merge(new_addition)
-#             session.commit()
-            
-        
-def delete_recent_message(chat_id):
-    result = session.query(RecentMessages).filter_by(chat_id=chat_id).first()
-    if result:
-        session.delete(result)
-        session.commit()
-        
+
 
 def add_new_lead_id(chat_id, lead_id):
     new_addition = LeadId(chat_id=chat_id, lead_id=lead_id)
@@ -361,13 +342,17 @@ def add_new_lead_id(chat_id, lead_id):
 
 
 def add_in_users(user_name, name, chat_id, user_id):
-    new_addition = Users(username=user_name, name=name,
-                         chat_id=chat_id, user_id=user_id)
-    session.merge(new_addition)
-    session.commit()
+    try:
+        new_addition = Users(username=user_name, name=name,
+                             chat_id=chat_id, user_id=user_id)
+        session.merge(new_addition)
+        session.commit()
+        return True
+    except:
+        return False
 
 
-def get_username_by_chat(chat_id):
+def get_username_by_chat(chat_id: int):
     user = session.query(UserNames).filter_by(chat_id=chat_id).first()
     if user:
         return user.username
@@ -463,8 +448,6 @@ def get_name_by_chat(chat_id: int):
         return user.name
     else:
         return None
-    
-
 
 
 def get_first_message():
@@ -493,23 +476,21 @@ def delete_first_message():
         print(str(e))
 
 
+def delete_new_prompt(chat_id):
+    all_records = session.query(NewPrompt).filter_by(chat_id=chat_id).first()
+    if all_records:
+        session.delete(all_records)
+        session.commit()
+    else:
+        print(f'no new prompt for user {chat_id}')
+
+
 def delete_amo_new_stage():
     try:
         first_record = session.query(AmoNewStages).first()
         if first_record:
             session.delete(first_record)
             session.commit()
-    except Exception as e:
-        print(str(e))
-        
-def delete_none_stage():
-    try:
-        first_record = session.query(AmoNewStages).all()
-        if first_record:
-            for item in first_record:
-                if not item.username or item.username is None or item.username == 'None':
-                    session.delete(item)
-                    session.commit()
     except Exception as e:
         print(str(e))
 
@@ -539,14 +520,28 @@ def delete_all_messages():
         for item in all_records:
             session.delete(item)
             session.commit()
-            
-def delete_new_prompt(chat_id):
-    all_records = session.query(NewPrompt).filter_by(chat_id=chat_id).first()
-    if all_records:
-        session.delete(all_records)
-        session.commit()
-    else:
-        print(f'no new prompt for user {chat_id}')
+
+
+def delete_none_stage():
+    try:
+        first_record = session.query(AmoNewStages).all()
+        if first_record:
+            for item in first_record:
+                if not item.username or item.username is None or item.username == 'None':
+                    session.delete(item)
+                    session.commit()
+    except Exception as e:
+        print(str(e))
+
+
+def add_recent_message_another_time(chat_id, stage_in_amo, time_hours):
+    result = session.query(RecentMessages).filter_by(chat_id=chat_id).first()
+    if result:
+        if result.stage_in_amo not in ['142', '143']:
+            new_addition = RecentMessages(
+                chat_id=chat_id, time=datetime.now()+timedelta(hours=time_hours), stage_in_amo=stage_in_amo)
+            session.merge(new_addition)
+            session.commit()
 
 
 def add_active(chat: str):
@@ -594,14 +589,16 @@ def check_recent_messages(minutes: int):
             for item in activity:
                 time_since_last_message = current_time - item.time
                 if time_since_last_message >= timedelta(minutes=minutes):
-                    list_of_not_recent.append((item.chat_id, item.stage_in_amo, item.time))
+                    list_of_not_recent.append(
+                        (item.chat_id, item.stage_in_amo, item.time))
         else:
             print('no chat id in table for update_true function')
     except Exception as e:
         print(str(e))
     finally:
         return list_of_not_recent
-    
+
+
 def delete_all_recent_messages():
     try:
         session.query(RecentMessages).delete()
@@ -638,6 +635,13 @@ def set_free_bot(chat: int):
         print('no chat id in table for set_free_bot function')
 
 
+def delete_recent_message(chat_id):
+    result = session.query(RecentMessages).filter_by(chat_id=chat_id).first()
+    if result:
+        session.delete(result)
+        session.commit()
+
+
 def update_false(chat: str):
     try:
         activity = session.query(BotActivity).filter_by(chat_id=chat).first()
@@ -654,11 +658,6 @@ def update_false(chat: str):
 def check_existing(chat: str):
     find_one = session.query(BotActivity).filter_by(chat_id=chat).first()
     return True if find_one else False
-
-def check_user_exists(chat_id: int):
-    find_one = session.query(Users).filter_by(chat_id=chat_id).first()
-    return True if find_one else False
-
 
 
 def check_bot_state_existing(chat: int):
