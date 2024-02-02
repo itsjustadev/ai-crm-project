@@ -8,7 +8,7 @@ import uvicorn
 from fastapi import FastAPI
 import databases as BotActivity
 from constants import *
-from helpers_functions import *
+from all_functions import *
 from server_routes import router
 
 

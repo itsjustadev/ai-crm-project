@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-from helpers_functions import function_for_initializing_conversation, helper_for_handle_amo_message, IncomingMessage, helper_for_psy_handle_amo_message, helper_for_redirect_leads, helper_for_handle_amo_stage_change
+from all_functions import function_for_initializing_conversation, helper_for_handle_amo_message, IncomingMessage, helper_for_psy_handle_amo_message, helper_for_redirect_leads, helper_for_handle_amo_stage_change
 
 # !Раздел сервера!
 
