@@ -1,5 +1,5 @@
 # Проект для прогрева лидов в Telegram боте с использованием Chat GPT
-и интеграцией с AMOcrm API
+#и интеграцией с AMOcrm API
 
 <img width="766" alt="Screen Shot 2024-02-25 at 20 57 58" src="https://github.com/itsjustadev/ai-crm-project/assets/86054371/74ec6437-2016-4dad-ab34-ed673067b04d">
 
