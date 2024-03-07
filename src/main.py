@@ -39,7 +39,7 @@ async def run_bot():
 async def main():
     await skip_updates(bot)
     loop = asyncio.get_event_loop()
-    flask_task = loop.run_in_executor(None, run_server)
+    fast_api_task = loop.run_in_executor(None, run_server)
     bot_task = loop.create_task(run_bot())
     messages_task = loop.create_task(checking_messages(bot))
     recent_messages_task = loop.create_task(check_recent_messages(bot))
@@ -56,7 +56,7 @@ async def main():
     dp.register_message_handler(
         lambda message: handle_photo(message, bot), content_types=types.ContentType.PHOTO)
     try:
-        await asyncio.gather(flask_task, bot_task, messages_task, amo_token_update_task, recent_messages_task)
+        await asyncio.gather(fast_api_task, bot_task, messages_task, amo_token_update_task, recent_messages_task)
     except KeyboardInterrupt:
         logging.info('Stopping the application...')
         for task in asyncio.all_tasks():
